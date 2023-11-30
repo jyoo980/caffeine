@@ -3,11 +3,15 @@ import de.thetaphi.forbiddenapis.gradle.CheckForbiddenApis
 import kotlin.math.max
 import net.ltgt.gradle.errorprone.errorprone
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
+import org.checkerframework.gradle.plugin.CheckerFrameworkExtension
 
 plugins {
   id("java-library-caffeine-conventions")
   id("jmh-caffeine-conventions")
+  id("org.checkerframework") version "0.6.35"
 }
+
+apply(plugin="org.checkerframework")
 
 sourceSets {
   create("javaPoet") {
@@ -347,6 +351,16 @@ data class Scenario(val implementation: Implementation,
       && (keys == KeyStrength.Strong) && (values == ValueStrength.Strong)
     return !guavaIncompatible && !asyncIncompatible && !noSlowTests
   }
+}
+
+configure<CheckerFrameworkExtension> {
+    checkers = listOf(
+        "org.checkerframework.checker.optional.OptionalChecker",
+    )
+    extraJavacArgs = listOf(
+        "-AsuppressWarnings=type.anno.before.modifier,type.anno.before.decl.anno",
+			  "-AassumePure"
+    )
 }
 
 enum class Implementation { Caffeine, Guava }
